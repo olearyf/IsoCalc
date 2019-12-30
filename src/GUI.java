@@ -9,9 +9,6 @@ import java.util.ArrayList;
 public class GUI extends JFrame{
 
     String[] options = {"--Select One--", "EE (2 files)", "KIE (4 files)"};
-    JTextField input, output;
-    JButton compute;
-    JComboBox optionList, optionList2;
     JComboBox optionMenu;
     FileManager fm = new FileManager();
     ArrayList<File> files = new ArrayList<>();
@@ -34,7 +31,6 @@ public class GUI extends JFrame{
         JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
 
         JButton openFile = new JButton("Add File");
-        JLabel filesLabel = new JLabel("Current Files:");
         JTextArea openedFiles = new JTextArea(6, 5);
         openedFiles.setText("Current Files: \n");
         openedFiles.setEditable(false);
@@ -57,15 +53,6 @@ public class GUI extends JFrame{
 
         optionMenu = new JComboBox(options);
         JLabel title1 = new JLabel("Please select your expression type:");
-        JLabel title2 =new JLabel("Please add your files below:");
-
-        /*optionList = new JComboBox(options);
-        optionList2 = new JComboBox(options);
-        input = new JTextField(20);
-        output = new JTextField(20);
-        compute = new JButton("Convert");*/
-        //compute.addActionListener(this);
-
         Box expressions = Box.createHorizontalBox();
         expressions.add(Box.createVerticalStrut(20));
         expressions.add(title1);
@@ -89,8 +76,6 @@ public class GUI extends JFrame{
         center.add(Box.createVerticalStrut(30));
 
         Box addingFiles = Box.createVerticalBox();
-        //addingFiles.add(title2);
-        //addingFiles.add(filesLabel);
         addingFiles.add(Box.createVerticalStrut(30));
         Box inside = Box.createHorizontalBox();
         inside.add(Box.createHorizontalStrut(30));
@@ -101,19 +86,128 @@ public class GUI extends JFrame{
         addingFiles.add(center);
         addingFiles.add(Box.createVerticalStrut(30));
 
+
+        JLabel uTS = new JLabel("Select Unlabeled TS File");
+        JLabel lTS = new JLabel("Select Labeled TS File");
+        JLabel uR = new JLabel("Select Unlabeled R File");
+        JLabel lR = new JLabel("Select Labeled R File");
+
+        JButton openFile1 = new JButton("Add File");
+        openFile1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int returnValue = jfc.showOpenDialog(null);
+
+                if (returnValue == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = jfc.getSelectedFile();
+                    files.add(0, new File(selectedFile.getAbsolutePath()));
+                    uTS.setText("UTS File: " + files.get(0).getName());
+                }
+            }
+        });
+        JButton openFile2 = new JButton("Add File");
+        openFile2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int returnValue = jfc.showOpenDialog(null);
+
+                if (returnValue == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = jfc.getSelectedFile();
+                    files.add(1, new File(selectedFile.getAbsolutePath()));
+                    lTS.setText("LTS File: " + files.get(1).getName());
+                }
+            }
+        });
+        JButton openFile3 = new JButton("Add File");
+        openFile3.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int returnValue = jfc.showOpenDialog(null);
+
+                if (returnValue == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = jfc.getSelectedFile();
+                    files.add(2, new File(selectedFile.getAbsolutePath()));
+                    uR.setText("UR File: " + files.get(2).getName());
+                }
+            }
+        });
+        JButton openFile4 = new JButton("Add File");
+        openFile4.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int returnValue = jfc.showOpenDialog(null);
+
+                if (returnValue == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = jfc.getSelectedFile();
+                    files.add(3, new File(selectedFile.getAbsolutePath()));
+                    lR.setText("LR File: " + files.get(3).getName());
+                }
+            }
+        });
+
+
+
+        Box file1 = Box.createHorizontalBox();
+        file1.add(Box.createHorizontalGlue());
+        file1.add(Box.createHorizontalStrut(30));
+        file1.add(uTS);
+        file1.add(Box.createHorizontalStrut(30));
+        file1.add(openFile1);
+        file1.add(Box.createHorizontalStrut(70));
+        //file1.add(Box.createHorizontalGlue());
+
+        Box file2 = Box.createHorizontalBox();
+        file2.add(Box.createHorizontalGlue());
+        file2.add(Box.createHorizontalStrut(30));
+        file2.add(lTS);
+        file2.add(Box.createHorizontalStrut(30));
+        file2.add(openFile2);
+        file2.add(Box.createHorizontalStrut(70));
+        //file2.add(Box.createHorizontalGlue());
+
+        Box file3 = Box.createHorizontalBox();
+        file3.add(Box.createHorizontalGlue());
+        file3.add(Box.createHorizontalStrut(30));
+        file3.add(uR);
+        file3.add(Box.createHorizontalStrut(30));
+        file3.add(openFile3);
+        file3.add(Box.createHorizontalStrut(70));
+        //file3.add(Box.createHorizontalGlue());
+
+        Box file4 = Box.createHorizontalBox();
+        file4.add(Box.createHorizontalGlue());
+        file4.add(Box.createHorizontalStrut(30));
+        file4.add(lR);
+        file4.add(Box.createHorizontalStrut(30));
+        file4.add(openFile4);
+        file4.add(Box.createHorizontalStrut(70));
+        //file4.add(Box.createHorizontalGlue());
+
+        Box fileStuff = Box.createVerticalBox();
+        fileStuff.add(Box.createVerticalStrut(30));
+        fileStuff.add(file1);
+        fileStuff.add(Box.createVerticalStrut(10));
+        fileStuff.add(file2);
+        fileStuff.add(Box.createVerticalStrut(10));
+        fileStuff.add(file3);
+        fileStuff.add(Box.createVerticalStrut(10));
+        fileStuff.add(file4);
+        fileStuff.add(Box.createVerticalStrut(30));
+
+        /*Box fileStuff = Box.createHorizontalBox();
+        fileStuff.add(fileLabels);
+        //fileStuff.add(Box.createHorizontalStrut(50));
+        fileStuff.add(fileButtons);*/
+
         JTextArea results = new JTextArea(12,5);
         JLabel title3 = new JLabel("Results:");
         JButton compute = new JButton("Compute Isotope Effects");
         Box top = Box.createHorizontalBox();
         top.add(Box.createHorizontalStrut(20));
-        /*top.add(left);
-        top.add(new JLabel("      =      "));
-        top.add(right);*/
         top.add(compute);
         top.add(Box.createHorizontalStrut(20));
 
         Box lasttitle = Box.createHorizontalBox();
-        //lasttitle .add(Box.createHorizontalStrut(30));
         lasttitle.add(title3);
         lasttitle.add(Box.createHorizontalStrut(300));
 
@@ -124,17 +218,15 @@ public class GUI extends JFrame{
 
         Box main = Box.createVerticalBox();
         main.add(Box.createVerticalStrut(30));
-        //main.add(Box.createVerticalStrut(80));
         main.add(expressions);
-        //main.add(Box.createVerticalStrut(60));
-        main.add(addingFiles);
+        //main.add(addingFiles);
+        main.add(fileStuff);
         main.add(top);
         main.add(Box.createVerticalStrut(30));
         main.add(lasttitle);
         main.add(Box.createVerticalStrut(30));
         main.add(resultWrap);
         main.add(Box.createVerticalStrut(30));
-        //main.add(Box.createVerticalStrut(40));
 
         panel.add(main);
         add(panel);
@@ -151,7 +243,10 @@ public class GUI extends JFrame{
                                 JOptionPane.ERROR_MESSAGE);
                     } else{
                         //calculations here
-                        openedFiles.setText("Current Files: \n");
+                        uTS.setText("Select Unlabeled TS File");
+                        lTS.setText("Select Labeled TS File");
+                        uR.setText("Select Unlabeled R File");
+                        lR.setText("Select Labeled R File");
                         files = new ArrayList<>();
                     }
                 } else if (expressionType.equals("KIE (4 files)")) {
@@ -162,7 +257,12 @@ public class GUI extends JFrame{
                                 JOptionPane.ERROR_MESSAGE);
                     } else{
                         //calculations here
-                        openedFiles.setText("Current Files: \n");
+                        KIE kie = new KIE(files.get(0), files.get(1), files.get(2), files.get(3));
+                        results.setText(kie.toString());
+                        uTS.setText("Select Unlabeled TS File");
+                        lTS.setText("Select Labeled TS File");
+                        uR.setText("Select Unlabeled R File");
+                        lR.setText("Select Labeled R File");
                         files = new ArrayList<>();
 
                     }
