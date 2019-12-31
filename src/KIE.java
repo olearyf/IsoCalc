@@ -9,6 +9,8 @@ public class KIE {
     ArrayList<Double> tsH_freqn, tsD_freqn, rH_freqn, rD_freqn;
     ArrayList<Double> tsH_eigenVals, tsD_eigenVals, rH_eigenVals, rD_eigenVals;
     ArrayList<Double> rD_div_rH, tsD_div_tsH;
+    ArrayList<Double> rH_HZPEs, tsH_HZPEs, rD_HZPEs, tsD_HPZEs;
+    ArrayList<Double> rh_rotTemps, tsh_rotTemps, rd_rotTemps, tsd_rotTemps;
     double ixyz_rH, ixyz_tsH, ixyz_rD, ixyz_tsD;
     double mmi;
     double rDrH_totalProduct, tsDtsH_totalProduct;
@@ -20,6 +22,14 @@ public class KIE {
     double excH_div_excRH, excD_div_excRD;
     double exc;
     double kie, vp_kie;
+    double rH_zpe, tsH_zpe, rD_zpe, tsD_zpe;
+    double enthalpy_zpe;
+    double enthalpy_vib;
+    double thermal_enthalpy;
+    double entropy_vib;
+    double entropy_rot;
+    double entropy_vib_plus_rot;
+
 
     private final double b1 = 6.6262 * Math.pow(10, -34);
     private final double b2 = 1.3807 * Math.pow(10, -23);
@@ -29,6 +39,10 @@ public class KIE {
     private final double b6 = 8.314;
     private final double b7 = 1.9872;
     private final double c18 = 298.15;
+    private final double rsn_rh = 1;
+    private final double rsn_tsh = 1;
+    private final double rsn_rd = 1;
+    private final double rsn_tsd = 1;
 
     public KIE(File uTS, File lTS, File uR, File lR){
         FileManager fm = new FileManager();
@@ -83,9 +97,77 @@ public class KIE {
             this.kie = mmi * zpe * exc;
             this.vp_kie = vpMMI * zpe * exc;
 
+            this.rD_HZPEs = calcIndivHZPE(rD_freqn);
+            this.tsD_HPZEs = calcIndivHZPE(tsD_freqn);
+            this.rH_HZPEs = calcIndivHZPE(rH_freqn);
+            this.tsH_HZPEs = calcIndivHZPE(tsH_freqn);
+
+            this.rH_zpe = sum(rH_HZPEs);
+            this.tsH_zpe = sum(tsH_HZPEs);
+            this.rD_zpe = sum(rD_HZPEs);
+            this.tsD_zpe = sum(tsD_HPZEs);
+
+            this.enthalpy_zpe = (tsD_zpe - rD_zpe) - (tsH_zpe - rH_zpe);
+
+            this.enthalpy_vib = calcEnthalpyVib(rH_freqn, tsH_freqn, rD_freqn, tsD_freqn);
+
+            this.entropy_vib = calcTotalEntropyVib(rH_freqn, tsH_freqn, rD_freqn, tsD_freqn);
+
+            this.rh_rotTemps = fm.getRotTemps(uR);
+            this.tsh_rotTemps = fm.getRotTemps(uTS);
+            this.rd_rotTemps = fm.getRotTemps(lR);
+            this.tsd_rotTemps = fm.getRotTemps(lTS);
+
+            this.entropy_rot = calcTotalEntropyRot(rh_rotTemps, tsh_rotTemps, rd_rotTemps, tsd_rotTemps);
+
+            this.entropy_vib_plus_rot = entropy_rot + entropy_vib;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    public double calcTotalEntropyRot(ArrayList<Double> rh, ArrayList<Double> tsh, ArrayList<Double> rd, ArrayList<Double> tsd){
+        return (calcIndivEntropyRot(tsh, rsn_tsh) - calcIndivEntropyRot(rh, rsn_rh)) - (calcIndivEntropyRot(tsd, rsn_tsd) - calcIndivEntropyRot(rd, rsn_rd));
+    }
+
+    public double calcIndivEntropyRot(ArrayList<Double> temps, double rsn){
+        System.out.println(b7 * (Math.log((Math.sqrt(Math.PI)) / rsn)*((Math.pow(c18, 1.5))/(Math.sqrt(temps.get(0) * temps.get(1) * temps.get(2))))+ 1.5));
+        return b7 * (Math.log((Math.sqrt(Math.PI)) / rsn)*(Math.pow(c18, 1.5)/(Math.sqrt((temps.get(0) * temps.get(1) * temps.get(2)))))+ 1.5);
+    }
+
+    public double calcTotalEntropyVib(ArrayList<Double> rh, ArrayList<Double> tsh, ArrayList<Double> rd, ArrayList<Double> tsd){
+        return (calcIndivEntropyVib(tsh) - calcIndivEntropyVib(rh)) - (calcIndivEntropyVib(tsd) - calcIndivEntropyVib(rd));
+    }
+    public double calcIndivEntropyVib(ArrayList<Double> freqs){
+        ArrayList<Double> result = new ArrayList<>();
+        for(int i = 0; i<freqs.size();i++){
+            result.add(((b1*b3*freqs.get(i)) / (b2 * c18)));
+        }
+        ArrayList<Double> newRes = new ArrayList<>();
+        for(Double r : result){
+            newRes.add(b7 * (((r / (Math.exp(r) - 1))) - (Math.log(1 - Math.exp(-r)))));
+        }
+        return sum(newRes);
+    }
+
+    public double calcEnthalpyVib(ArrayList<Double> rh, ArrayList<Double> tsh, ArrayList<Double> rd, ArrayList<Double> tsd){
+        return (calcIndivEnthalpyVib(tsd) - calcIndivEnthalpyVib(rd)) - (calcIndivEnthalpyVib(tsh) - calcIndivEnthalpyVib(rh));
+    }
+
+    public double calcIndivEnthalpyVib(ArrayList<Double> freqs){
+        ArrayList<Double> result = new ArrayList<>();
+        for(Double d : freqs){
+            result.add(b4*((b1 * b3 * d) / (b2)) / (Math.exp(((b1 * b3 * d ) / (b2)) / c18)-1));
+        }
+        return sum(result);
+    }
+
+    public ArrayList<Double> calcIndivHZPE(ArrayList<Double> freqs){
+        ArrayList<Double> result = new ArrayList<>();
+        for( Double d: freqs){
+            result.add(0.5*(b1 * b3 * d * b6) / (b2 * b5));
+        }
+        return result;
     }
 
     public double calcIndivEXC(ArrayList<Double> freqs){
@@ -195,6 +277,42 @@ public class KIE {
     }
     public double getVp_kie(){
         return vp_kie;
+    }
+
+    public double getrD_zpe(){
+        return rD_zpe;
+    }
+
+    public double getrH_zpe(){
+        return rH_zpe;
+    }
+
+    public double getTsH_zpe(){
+        return tsH_zpe;
+    }
+
+    public double getTsD_zpe(){
+        return tsD_zpe;
+    }
+
+    public double getEnthalpy_zpe(){
+        return enthalpy_zpe;
+    }
+
+    public double getEnthalpy_vib(){
+        return enthalpy_vib;
+    }
+
+    public double getEntropy_vib(){
+        return entropy_vib;
+    }
+
+    public double getEntropy_rot(){
+        return entropy_rot;
+    }
+
+    public double getEntropy_vib_plus_rot(){
+        return entropy_vib_plus_rot;
     }
 
     @Override

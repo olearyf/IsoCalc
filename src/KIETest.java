@@ -53,6 +53,15 @@ public class KIETest {
         System.out.println(kie.exc);*/
         /*System.out.println(kie.getKie());
         System.out.println(kie.getVp_kie());*/
-        System.out.println(kie);
+        //System.out.println(kie);
+        /*System.out.println(kie.getrH_zpe());
+        System.out.println(kie.getTsH_zpe());
+        System.out.println(kie.getrD_zpe());
+        System.out.println(kie.getTsD_zpe());
+        System.out.println(kie.getEnthalpy_zpe());*/
+        //System.out.println(kie.getEnthalpy_vib());
+        //System.out.println(kie.getEntropy_vib());
+        System.out.println(kie.getEntropy_rot());
+        System.out.println(kie.getEntropy_vib_plus_rot());
     }
 }
