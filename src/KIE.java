@@ -39,10 +39,10 @@ public class KIE {
     private final double b6 = 8.314;
     private final double b7 = 1.9872;
     private final double c18 = 298.15;
-    private final double rsn_rh = 1;
-    private final double rsn_tsh = 1;
-    private final double rsn_rd = 1;
-    private final double rsn_tsd = 1;
+    private final int rsn_rh = 1;
+    private final int rsn_tsh = 1;
+    private final int rsn_rd = 1;
+    private final int rsn_tsd = 1;
 
     public KIE(File uTS, File lTS, File uR, File lR){
         FileManager fm = new FileManager();
@@ -131,8 +131,8 @@ public class KIE {
     }
 
     public double calcIndivEntropyRot(ArrayList<Double> temps, double rsn){
-        System.out.println(b7 * (Math.log((Math.sqrt(Math.PI)) / rsn)*((Math.pow(c18, 1.5))/(Math.sqrt(temps.get(0) * temps.get(1) * temps.get(2))))+ 1.5));
-        return b7 * (Math.log((Math.sqrt(Math.PI)) / rsn)*(Math.pow(c18, 1.5)/(Math.sqrt((temps.get(0) * temps.get(1) * temps.get(2)))))+ 1.5);
+        //System.out.println(b7 * (Math.log((Math.sqrt(Math.PI)) / rsn)*((Math.pow(c18, 1.5))/(Math.sqrt(temps.get(0) * temps.get(1) * temps.get(2))))+ 1.5));
+        return b7 * (Math.log((Math.sqrt(Math.PI) / rsn)*(Math.pow(c18, 1.5)/(Math.sqrt((temps.get(0) * temps.get(1) * temps.get(2))))))+ 1.5);
     }
 
     public double calcTotalEntropyVib(ArrayList<Double> rh, ArrayList<Double> tsh, ArrayList<Double> rd, ArrayList<Double> tsd){
@@ -315,9 +315,30 @@ public class KIE {
         return entropy_vib_plus_rot;
     }
 
+    public double convertUnits(double d){
+        return Math.exp(d / (b4*c18));
+    }
+
+    public double convertOtherUnits(double d){
+        return Math.exp(d / b7);
+    }
+
     @Override
     public String toString() {
-        String s = "KIE: " + String.format("%.5f", kie) + "\nKIE w/ VP(MMI): " + String.format("%.5f", vp_kie) + "\nMMI: " + String.format("%.5f", mmi) + "\nVP(MMI): " + String.format("%.5f", vpMMI) + "\nZPE: " + String.format("%.5f", zpe) + "\nEXC: " + String.format("%.5f", exc);
+        String s = "Bigeleisen-Mayer KIE Calculation, T = " + c18 + " K"+ "\nKIE: " +
+                String.format("%.5f", kie) + "\nKIE w/ VP(MMI): " +
+                String.format("%.5f", vp_kie) + "\nMMI: " + String.format("%.5f", mmi)
+                + "\nVP(MMI): " + String.format("%.5f", vpMMI) + "\nZPE: " +
+                String.format("%.5f", zpe) + "\nEXC: " + String.format("%.5f", exc)
+                + "\nVP(MMI)*ZPE*EXC: " + String.format("%.5f", vpMMI*zpe*exc) +
+                "\nMMI*ZPE*EXC: " + String.format("%.5f", mmi*zpe*exc)+ "\n" + "Enthalpy-Entropy KIE Calculation T = " + c18 + " K" +
+                "\nZPVE: " + String.format("%.5f", convertUnits(enthalpy_zpe))
+                + "\nVibrational Enthalpy: " + String.format("%.5f", convertUnits(enthalpy_vib)) +
+                "\nThermal Enthalpy: " + String.format("%.5f", convertUnits(enthalpy_vib)*convertUnits(enthalpy_zpe)) +
+                "\nVibrational Entropy: " + String.format("%.5f", convertOtherUnits(entropy_vib)) +
+                "\nRotational Entropy: " + String.format("%.5f", convertOtherUnits(entropy_rot)) +
+                "\nEntropy: " + String.format("%.5f", convertOtherUnits(entropy_vib)*convertOtherUnits(entropy_rot)) +
+                "\nG: " + String.format("%.5f", convertUnits(enthalpy_vib)*convertUnits(enthalpy_zpe)*(convertOtherUnits(entropy_vib)*convertOtherUnits(entropy_rot)));
         return s;
     }
 }

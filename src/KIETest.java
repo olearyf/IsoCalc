@@ -61,7 +61,8 @@ public class KIETest {
         System.out.println(kie.getEnthalpy_zpe());*/
         //System.out.println(kie.getEnthalpy_vib());
         //System.out.println(kie.getEntropy_vib());
-        System.out.println(kie.getEntropy_rot());
-        System.out.println(kie.getEntropy_vib_plus_rot());
+        //System.out.println(kie.getEntropy_rot());
+        //System.out.println(kie.getEntropy_vib_plus_rot());
+        System.out.println(kie);
     }
 }
