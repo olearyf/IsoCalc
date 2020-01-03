@@ -38,15 +38,106 @@ public class KIE {
     private final double b5 = 4184.0;
     private final double b6 = 8.314;
     private final double b7 = 1.9872;
-    private final double c18 = 298.15;
-    private final int rsn_rh = 1;
-    private final int rsn_tsh = 1;
-    private final int rsn_rd = 1;
-    private final int rsn_tsd = 1;
+    private double c18;
+    private int rsn_rh;
+    private int rsn_tsh;
+    private int rsn_rd;
+    private int rsn_tsd;
+
+    public KIE(File uTS, File lTS, File uR, File lR, int rsn_tsh, int rsn_tsd, int rsn_rh, int rsn_rd, double c18){
+        FileManager fm = new FileManager();
+        try {
+            this.c18 = c18;
+            this.rsn_tsh = rsn_tsh;
+            this.rsn_tsd = rsn_tsd;
+            this.rsn_rh = rsn_rh;
+            this.rsn_rd = rsn_rd;
+            this.tsH_freq = fm.getFrequencies(uTS);
+            this.tsD_freq = fm.getFrequencies(lTS);
+            this.rH_freq = fm.getFrequencies(uR);
+            this.rD_freq = fm.getFrequencies(lR);
+
+            this.tsH_freqn = removeNegatives(tsH_freq);
+            this.tsD_freqn = removeNegatives(tsD_freq);
+            this.rH_freqn = removeNegatives(rH_freq);
+            this.rD_freqn = removeNegatives(rD_freq);
+
+            this.tsH_eigenVals = fm.getXYZ(uTS);
+            this.tsD_eigenVals = fm.getXYZ(lTS);
+            this.rH_eigenVals = fm.getXYZ(uR);
+            this.rD_eigenVals = fm.getXYZ(lR);
+
+            this.ixyz_rH = rH_eigenVals.get(0)*rH_eigenVals.get(1)*rH_eigenVals.get(2);
+            this.ixyz_tsH = tsH_eigenVals.get(0)*tsH_eigenVals.get(1)*tsH_eigenVals.get(2);
+            this.ixyz_rD = rD_eigenVals.get(0)*rD_eigenVals.get(1)*rD_eigenVals.get(2);
+            this.ixyz_tsD = tsD_eigenVals.get(0)*tsD_eigenVals.get(1)*tsD_eigenVals.get(2);
+
+            this.mmi = Math.sqrt((ixyz_tsH*ixyz_rD) / (ixyz_tsD*ixyz_rH));
+
+            this.rD_div_rH = calcDiv(rD_freq, rH_freq);
+            this.tsD_div_tsH = calcDiv(tsD_freq, tsH_freq);
+            this.rDrH_totalProduct = totalProduct(rD_div_rH);
+            this.tsDtsH_totalProduct = totalProduct(tsD_div_tsH);
+
+            this.vpMMI = rDrH_totalProduct / tsDtsH_totalProduct;
+
+            this.zpeH = calcIndivZPE(tsH_freqn);
+            this.zpeRH = calcIndivZPE(rH_freqn);
+            this.zpeD = calcIndivZPE(tsD_freqn);
+            this.zpeRD = calcIndivZPE(rD_freqn);
+
+            this.zpeD_div_zpeRD = calcCombZPE(zpeD, zpeRD);
+            this.zpeH_div_zpeRH = calcCombZPE(zpeH, zpeRH);
+            this.zpe = zpeH_div_zpeRH / zpeD_div_zpeRD;
+
+            this.excH = calcIndivEXC(tsH_freqn);
+            this.excRH = calcIndivEXC(rH_freqn);
+            this.excD = calcIndivEXC(tsD_freqn);
+            this.excRD = calcIndivEXC(rD_freqn);
+
+            this.excH_div_excRH = excH / excRH;
+            this.excD_div_excRD = excD / excRD;
+            this.exc = excH_div_excRH / excD_div_excRD;
+
+            this.kie = mmi * zpe * exc;
+            this.vp_kie = vpMMI * zpe * exc;
+
+            this.rD_HZPEs = calcIndivHZPE(rD_freqn);
+            this.tsD_HPZEs = calcIndivHZPE(tsD_freqn);
+            this.rH_HZPEs = calcIndivHZPE(rH_freqn);
+            this.tsH_HZPEs = calcIndivHZPE(tsH_freqn);
+
+            this.rH_zpe = sum(rH_HZPEs);
+            this.tsH_zpe = sum(tsH_HZPEs);
+            this.rD_zpe = sum(rD_HZPEs);
+            this.tsD_zpe = sum(tsD_HPZEs);
+
+            this.enthalpy_zpe = (tsD_zpe - rD_zpe) - (tsH_zpe - rH_zpe);
+
+            this.enthalpy_vib = calcEnthalpyVib(rH_freqn, tsH_freqn, rD_freqn, tsD_freqn);
+
+            this.entropy_vib = calcTotalEntropyVib(rH_freqn, tsH_freqn, rD_freqn, tsD_freqn);
+
+            this.rh_rotTemps = fm.getRotTemps(uR);
+            this.tsh_rotTemps = fm.getRotTemps(uTS);
+            this.rd_rotTemps = fm.getRotTemps(lR);
+            this.tsd_rotTemps = fm.getRotTemps(lTS);
+
+            this.entropy_rot = calcTotalEntropyRot(rh_rotTemps, tsh_rotTemps, rd_rotTemps, tsd_rotTemps);
+
+            this.entropy_vib_plus_rot = entropy_rot + entropy_vib;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
 
     public KIE(File uTS, File lTS, File uR, File lR){
         FileManager fm = new FileManager();
         try {
+            this.rsn_tsh = rsn_tsh;
+            this.rsn_tsd = rsn_tsd;
+            this.rsn_rh = rsn_rh;
+            this.rsn_rd = rsn_rd;
             this.tsH_freq = fm.getFrequencies(uTS);
             this.tsD_freq = fm.getFrequencies(lTS);
             this.rH_freq = fm.getFrequencies(uR);
@@ -127,7 +218,7 @@ public class KIE {
     }
 
     public double calcTotalEntropyRot(ArrayList<Double> rh, ArrayList<Double> tsh, ArrayList<Double> rd, ArrayList<Double> tsd){
-        return (calcIndivEntropyRot(tsh, rsn_tsh) - calcIndivEntropyRot(rh, rsn_rh)) - (calcIndivEntropyRot(tsd, rsn_tsd) - calcIndivEntropyRot(rd, rsn_rd));
+        return (calcIndivEntropyRot(tsh, getRsn_tsh()) - calcIndivEntropyRot(rh,getRsn_tsd())) - (calcIndivEntropyRot(tsd, getRsn_tsd()) - calcIndivEntropyRot(rd, getRsn_rd()));
     }
 
     public double calcIndivEntropyRot(ArrayList<Double> temps, double rsn){
@@ -323,6 +414,35 @@ public class KIE {
         return Math.exp(d / b7);
     }
 
+    public void setRsn_tsh(int n){
+        this.rsn_tsh = n;
+    }
+    public void setRsn_tsd(int n){
+        this.rsn_tsd = n;
+    }
+    public void setRsn_rh(int n){
+        this.rsn_rh = n;
+    }
+    public void setRsn_rd(int n){
+        this.rsn_rd = n;
+    }
+
+    public int getRsn_rh(){
+        return rsn_rh;
+    }
+
+    public int getRsn_tsh(){
+        return rsn_tsh;
+    }
+
+    public int getRsn_rd(){
+        return rsn_rd;
+    }
+
+    public int getRsn_tsd(){
+        return rsn_tsd;
+    }
+
     @Override
     public String toString() {
         String s = "Bigeleisen-Mayer KIE Calculation, T = " + c18 + " K"+ "\nKIE: " +
@@ -330,8 +450,8 @@ public class KIE {
                 String.format("%.5f", vp_kie) + "\nMMI: " + String.format("%.5f", mmi)
                 + "\nVP(MMI): " + String.format("%.5f", vpMMI) + "\nZPE: " +
                 String.format("%.5f", zpe) + "\nEXC: " + String.format("%.5f", exc)
-                + "\nVP(MMI)*ZPE*EXC: " + String.format("%.5f", vpMMI*zpe*exc) +
-                "\nMMI*ZPE*EXC: " + String.format("%.5f", mmi*zpe*exc)+ "\n" + "Enthalpy-Entropy KIE Calculation T = " + c18 + " K" +
+                + /*"\nVP(MMI)*ZPE*EXC: " + String.format("%.5f", vpMMI*zpe*exc) +
+                "\nMMI*ZPE*EXC: " + String.format("%.5f", mmi*zpe*exc)+ */"\n" + "Enthalpy-Entropy KIE Calculation T = " + c18 + " K" +
                 "\nZPVE: " + String.format("%.5f", convertUnits(enthalpy_zpe))
                 + "\nVibrational Enthalpy: " + String.format("%.5f", convertUnits(enthalpy_vib)) +
                 "\nThermal Enthalpy: " + String.format("%.5f", convertUnits(enthalpy_vib)*convertUnits(enthalpy_zpe)) +
