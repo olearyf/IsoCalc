@@ -43,19 +43,21 @@ public class KIE {
     private int rsn_tsh;
     private int rsn_rd;
     private int rsn_tsd;
+    private double scalefactor;
 
-    public KIE(File uTS, File lTS, File uR, File lR, int rsn_tsh, int rsn_tsd, int rsn_rh, int rsn_rd, double c18){
+    public KIE(File uTS, File lTS, File uR, File lR, int rsn_tsh, int rsn_tsd, int rsn_rh, int rsn_rd, double c18, double scaleFactor){
         FileManager fm = new FileManager();
         try {
             this.c18 = c18;
+            this.scalefactor = scaleFactor;
             this.rsn_tsh = rsn_tsh;
             this.rsn_tsd = rsn_tsd;
             this.rsn_rh = rsn_rh;
             this.rsn_rd = rsn_rd;
-            this.tsH_freq = fm.getFrequencies(uTS);
-            this.tsD_freq = fm.getFrequencies(lTS);
-            this.rH_freq = fm.getFrequencies(uR);
-            this.rD_freq = fm.getFrequencies(lR);
+            this.tsH_freq = fm.getFrequencies(uTS, scalefactor);
+            this.tsD_freq = fm.getFrequencies(lTS, scalefactor);
+            this.rH_freq = fm.getFrequencies(uR, scalefactor);
+            this.rD_freq = fm.getFrequencies(lR, scalefactor);
 
             this.tsH_freqn = removeNegatives(tsH_freq);
             this.tsD_freqn = removeNegatives(tsD_freq);
@@ -461,4 +463,26 @@ public class KIE {
                 "\nG: " + String.format("%.5f", convertUnits(enthalpy_vib)*convertUnits(enthalpy_zpe)*(convertOtherUnits(entropy_vib)*convertOtherUnits(entropy_rot)));
         return s;
     }
+
+    public String getBM(){
+        String s ="Scale Factor = " +  String.format("%.5f", scalefactor) + " T = " + c18 + " K"+ "\nKIE: " +
+                String.format("%.5f", kie) + "\nKIE w/ VP(MMI): " +
+                String.format("%.5f", vp_kie) + "\nMMI: " + String.format("%.5f", mmi)
+                + "\nVP(MMI): " + String.format("%.5f", vpMMI) + "\nZPE: " +
+                String.format("%.5f", zpe) + "\nEXC: " + String.format("%.5f", exc);
+        return s;
+    }
+
+    public String getEE(){
+        String s = "Scale Factor = " +  String.format("%.5f", scalefactor) + " T = " + c18 + " K" +
+                "\nZPVE: " + String.format("%.5f", convertUnits(enthalpy_zpe))
+                + "\nVibrational Enthalpy: " + String.format("%.5f", convertUnits(enthalpy_vib)) +
+                "\nThermal Enthalpy: " + String.format("%.5f", convertUnits(enthalpy_vib)*convertUnits(enthalpy_zpe)) +
+                "\nVibrational Entropy: " + String.format("%.5f", convertOtherUnits(entropy_vib)) +
+                "\nRotational Entropy: " + String.format("%.5f", convertOtherUnits(entropy_rot)) +
+                "\nEntropy: " + String.format("%.5f", convertOtherUnits(entropy_vib)*convertOtherUnits(entropy_rot)) +
+                "\nG: " + String.format("%.5f", convertUnits(enthalpy_vib)*convertUnits(enthalpy_zpe)*(convertOtherUnits(entropy_vib)*convertOtherUnits(entropy_rot)));
+        return s;
+    }
+
 }
