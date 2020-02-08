@@ -3,62 +3,18 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.ArrayList;
 
-/**
- * GUI4
- *
- * Version 4 of the GUI
- *
- *
- * @author Frances O'Leary
- * @version 01-07-2020
- *
- */
-
-//look into running several tasks at once to speed it up
-//valid file types = txt or log files or out
-//learn gridbag layout
-
-public class GUI4 extends JFrame{
+public class EIEGUI extends JPanel {
 
     ArrayList<File> files = new ArrayList<>();
-    KIE kie;
+    EIE eie;
     String filePath;
 
-    GUI4(){
-        JTabbedPane tabbedPane = new JTabbedPane();
-
-        JPanel panel1 = new JPanel(false);
-        JLabel filler = new JLabel("KIE (4 files)");
-        filler.setHorizontalAlignment(JLabel.CENTER);
-        panel1.setLayout(new GridLayout(1, 1));
-        //panel1.add(filler);
-        tabbedPane.addTab("KIE", null, panel1,
-                "4 Files");
-        tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
-
-        JPanel panel2 = new JPanel(false);
-        JLabel filler2 = new JLabel("EIE");
-        filler2.setHorizontalAlignment(JLabel.CENTER);
-        panel2.setLayout(new GridLayout(1, 1));
-        //panel2.add(filler);
-        tabbedPane.addTab("EIE", null, panel2,
-                "2 Files");
-        tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
-
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 600);
-        setTitle(" Quiver•HS ");
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        int h = (int)screenSize.getHeight();
-        int w = (int)screenSize.getWidth();
-        setLocation(w/2-400, h/2-300);
-        setResizable(false);
-        ImageIcon icon = new ImageIcon("C:\\Users\\fraol\\IdeaProjects\\IsoCalc\\science.png");
-        setIconImage(icon.getImage());
+    public EIEGUI(){
 
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
@@ -85,8 +41,6 @@ public class GUI4 extends JFrame{
                 }
             }
         });
-        JLabel uTS = new JLabel("Select Unlabeled Transition State File");
-        JLabel lTS = new JLabel("Select Labeled Transition State File");
         JLabel uR = new JLabel("Select Unlabeled Ground State File");
         JLabel lR = new JLabel("Select Labeled Ground State File");
 
@@ -94,40 +48,9 @@ public class GUI4 extends JFrame{
         clearFiles.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                uTS.setText("Select Unlabeled Transition State File");
-                lTS.setText("Select Labeled Transition State File");
                 uR.setText("Select Unlabeled Ground State File");
                 lR.setText("Select Labeled Ground State File");
                 files = new ArrayList<>();
-            }
-        });
-
-        JButton openFile1 = new JButton("Add File");
-        openFile1.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int returnValue = jfc.showOpenDialog(null);
-
-                if (returnValue == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = jfc.getSelectedFile();
-                    files.add(0, new File(selectedFile.getAbsolutePath()));
-                    uTS.setText("UTS File: " + files.get(0).getName());
-                    int n = files.get(0).getName().length();
-                    filePath = selectedFile.getAbsolutePath().substring(0, selectedFile.getAbsolutePath().length()-n);
-                }
-            }
-        });
-        JButton openFile2 = new JButton("Add File");
-        openFile2.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int returnValue = jfc.showOpenDialog(null);
-
-                if (returnValue == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = jfc.getSelectedFile();
-                    files.add(1, new File(selectedFile.getAbsolutePath()));
-                    lTS.setText("LTS File: " + files.get(1).getName());
-                }
             }
         });
         JButton openFile3 = new JButton("Add File");
@@ -138,7 +61,7 @@ public class GUI4 extends JFrame{
 
                 if (returnValue == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = jfc.getSelectedFile();
-                    files.add(2, new File(selectedFile.getAbsolutePath()));
+                    files.add(0, new File(selectedFile.getAbsolutePath()));
                     uR.setText("UGS File: " + files.get(2).getName());
                 }
             }
@@ -151,62 +74,22 @@ public class GUI4 extends JFrame{
 
                 if (returnValue == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = jfc.getSelectedFile();
-                    files.add(3, new File(selectedFile.getAbsolutePath()));
+                    files.add(1, new File(selectedFile.getAbsolutePath()));
                     lR.setText("LGS File: " + files.get(3).getName());
                 }
             }
         });
 
-        GridLayout experimentLayout1 = new GridLayout(4,4);
+        GridLayout experimentLayout1 = new GridLayout(2,2);
         experimentLayout1.setHgap(10);
         experimentLayout1.setVgap(10);
         JPanel entryStuff = new JPanel();
-        JLabel set1 = new JLabel("Sym. # σ: ");
-        JLabel set2 = new JLabel("Sym. # σ: ");
         JLabel set3 = new JLabel("Sym. # σ: ");
         JLabel set4 = new JLabel("Sym. # σ: ");
-        JButton viewFile1 = new JButton("View File");
-        JButton viewFile2 = new JButton("View File");
         JButton viewFile3 = new JButton("View File");
         JButton viewFile4 = new JButton("View File");
 
         Desktop desktop1 = Desktop.getDesktop();
-
-        viewFile1.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if(!(files.size() >= 1)){
-                    JOptionPane.showMessageDialog(null,
-                            "Please upload a file first.",
-                            "File Not Uploaded",
-                            JOptionPane.ERROR_MESSAGE);
-                } else {
-                    try {
-                        desktop1.open(files.get(0));
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            }
-        });
-
-        viewFile2.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if(!(files.size() >= 2)){
-                    JOptionPane.showMessageDialog(null,
-                            "Please upload a file first.",
-                            "File Not Uploaded",
-                            JOptionPane.ERROR_MESSAGE);
-                } else {
-                    try {
-                        desktop1.open(files.get(1));
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            }
-        });
 
         viewFile3.addActionListener(new ActionListener() {
             @Override
@@ -243,19 +126,9 @@ public class GUI4 extends JFrame{
                 }
             }
         });
-        JTextField text1 = new JTextField("1");
-        JTextField text2 = new JTextField("1");
         JTextField text3 = new JTextField("1");
         JTextField text4 = new JTextField("1");
         entryStuff.setLayout(experimentLayout1);
-        entryStuff.add(set1);
-        entryStuff.add(text1);
-        entryStuff.add(openFile1);
-        entryStuff.add(viewFile1);
-        entryStuff.add(set2);
-        entryStuff.add(text2);
-        entryStuff.add(openFile2);
-        entryStuff.add(viewFile2);
         entryStuff.add(set3);
         entryStuff.add(text3);
         entryStuff.add(openFile3);
@@ -265,7 +138,7 @@ public class GUI4 extends JFrame{
         entryStuff.add(openFile4);
         entryStuff.add(viewFile4);
 
-        GridLayout experimentLayout4 = new GridLayout(4,1);
+        GridLayout experimentLayout4 = new GridLayout(2,1);
         experimentLayout4.setHgap(10);
         experimentLayout4.setVgap(10);
         JPanel setSets = new JPanel();
@@ -278,13 +151,11 @@ public class GUI4 extends JFrame{
         entryStuff1.add(setSets);
         entryStuff1.add(entryStuff);
 
-        GridLayout experimentLayout2 = new GridLayout(4,1);
+        GridLayout experimentLayout2 = new GridLayout(2,1);
         experimentLayout2.setHgap(10);
         experimentLayout2.setVgap(10);
         JPanel fileLabels = new JPanel();
         fileLabels.setLayout(experimentLayout2);
-        fileLabels.add(uTS);
-        fileLabels.add(lTS);
         fileLabels.add(uR);
         fileLabels.add(lR);
 
@@ -313,7 +184,7 @@ public class GUI4 extends JFrame{
         lasttitle.add(Box.createHorizontalGlue());
 
         Box result1Pan = Box.createVerticalBox();
-        JLabel bg = new JLabel("Bigeleisen-Mayer KIE Calculation:");
+        JLabel bg = new JLabel("Bigeleisen-Mayer EIE Calculation:");
         Box r1 = Box.createHorizontalBox();
         r1.add(bg);
         r1.add(Box.createHorizontalGlue());
@@ -322,7 +193,7 @@ public class GUI4 extends JFrame{
         result1Pan.add(results);
 
         Box result2Pan = Box.createVerticalBox();
-        JLabel ee = new JLabel("Enthalpy-Entropy KIE Calculation:");
+        JLabel ee = new JLabel("Enthalpy-Entropy EIE Calculation:");
         Box r2 = Box.createHorizontalBox();
         r2.add(ee);
         r2.add(Box.createHorizontalGlue());
@@ -383,36 +254,36 @@ public class GUI4 extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                    if(kie == null || filePath == null){
-                        JOptionPane.showMessageDialog(null,
-                                "Please generate your results first.",
-                                "KIE not initialized.",
-                                JOptionPane.ERROR_MESSAGE);
-                    } else {
-                        String m = JOptionPane.showInputDialog(null, "Please enter the new file name(with '.txt'):",
-                                "Export File Destination", JOptionPane.QUESTION_MESSAGE);
-                        File save = new File(filePath + m);
-                        FileOutputStream fos = null;
-                        try {
-                            fos = new FileOutputStream(save, true);
-                        } catch (FileNotFoundException e1) {
-                            e1.printStackTrace();
-                        }
-                        PrintWriter pw = new PrintWriter(fos);
-                        pw.println(kie);
-                        pw.close();
-                        try {
-                            fos.close();
-                        } catch (IOException e2) {
-                            e2.printStackTrace();
-                        }
-                        Desktop desktop = Desktop.getDesktop();
-                        try {
-                            desktop.open(save);
-                        } catch (IOException ex) {
-                            ex.printStackTrace();
-                        }
+                if(eie == null || filePath == null){
+                    JOptionPane.showMessageDialog(null,
+                            "Please generate your results first.",
+                            "EIE not initialized.",
+                            JOptionPane.ERROR_MESSAGE);
+                } else {
+                    String m = JOptionPane.showInputDialog(null, "Please enter the new file name(with '.txt'):",
+                            "Export File Destination", JOptionPane.QUESTION_MESSAGE);
+                    File save = new File(filePath + m);
+                    FileOutputStream fos = null;
+                    try {
+                        fos = new FileOutputStream(save, true);
+                    } catch (FileNotFoundException e1) {
+                        e1.printStackTrace();
                     }
+                    PrintWriter pw = new PrintWriter(fos);
+                    pw.println(eie);
+                    pw.close();
+                    try {
+                        fos.close();
+                    } catch (IOException e2) {
+                        e2.printStackTrace();
+                    }
+                    Desktop desktop = Desktop.getDesktop();
+                    try {
+                        desktop.open(save);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                }
             }
 
         });
@@ -422,10 +293,10 @@ public class GUI4 extends JFrame{
         exportTempRange.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(kie == null || filePath == null){
+                if(eie == null || filePath == null){
                     JOptionPane.showMessageDialog(null,
                             "Please generate your results first.",
-                            "KIE not initialized.",
+                            "EIE not initialized.",
                             JOptionPane.ERROR_MESSAGE);
                 } else {
                     String m = JOptionPane.showInputDialog(null, "Please enter the new file name(with '.txt'): ",
@@ -439,10 +310,7 @@ public class GUI4 extends JFrame{
                     double btem = getTemp(beginTemp);
                     double etem = getTemp(endTemp);
                     double ti = getTemp(tempInterval);
-                    ArrayList<KIE> kies = new ArrayList<>();
-                    for(double thistemp = btem; thistemp <= etem; thistemp +=ti){
-                        kies.add(new KIE(files.get(0), files.get(1), files.get(2), files.get(3),  getRSN(text1.getText()), getRSN(text2.getText()), getRSN(text3.getText()), getRSN(text4.getText()), getTemp(temp.getText()), thistemp));
-                    }
+                    ArrayList<EIE> eies = new ArrayList<>();
                     File save = new File(filePath + m);
                     FileOutputStream fos = null;
                     try {
@@ -451,8 +319,8 @@ public class GUI4 extends JFrame{
                         e1.printStackTrace();
                     }
                     PrintWriter pw = new PrintWriter(fos);
-                    for(KIE k : kies){
-                        pw.println(k);
+                    for(EIE n : eies){
+                        pw.println(n);
                     }
                     pw.close();
                     try {
@@ -496,35 +364,29 @@ public class GUI4 extends JFrame{
         main3.add(Box.createVerticalStrut(10));
         main3.add(main2);
 
-        panel1.setBorder(new EmptyBorder(5, 5, 5, 5));
-        panel1.add(main3);
-        panel2.add(new EIEGUI());
-        add(tabbedPane);
+        //setBorder(new EmptyBorder(5, 5, 5, 5));
+        add(main3);
         compute.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(files.size() != 4){
+                if(files.size() != 2){
                     JOptionPane.showMessageDialog(null,
-                            "Please upload exactly 4 files.",
+                            "Please upload exactly 2 files.",
                             "Invalid File Number",
                             JOptionPane.ERROR_MESSAGE);
                 } else{
-
-                    if(isValidRSN(text1.getText())){
-                        //kie.setRsn_tsh(getRSN(text1.getText()));
-                        if(isValidRSN(text2.getText())){
-                            //kie.setRsn_tsd(getRSN(text2.getText()));
                             if(isValidRSN(text3.getText())){
                                 //kie.setRsn_rh(getRSN(text3.getText()));
                                 if(isValidRSN(text4.getText())){
                                     //kie.setRsn_rd(getRSN(text4.getText()));
                                     if(isValidTemp(temp.getText())){
                                         if(isValidTemp(scalefactor.getText())) {
-                                            kie = new KIE(files.get(0), files.get(1), files.get(2), files.get(3), getRSN(text1.getText()), getRSN(text2.getText()), getRSN(text3.getText()), getRSN(text4.getText()), getTemp(temp.getText()), getTemp(scalefactor.getText()));
-                                            results.setText(kie.getBM());
-                                            results.setEditable(false);
-                                            results2.setText(kie.getEE());
-                                            results2.setEditable(false);
+                                            //kie = new KIE(files.get(0), files.get(1), files.get(2), files.get(3), getRSN(text1.getText()), getRSN(text2.getText()), getRSN(text3.getText()), getRSN(text4.getText()), getTemp(temp.getText()), getTemp(scalefactor.getText()));
+                                            eie = new EIE(files.get(0), files.get(1), getRSN(text3.getText()), getRSN(text4.getText()), getTemp(temp.getText()), getTemp(scalefactor.getText()));
+                                            //results.setText(kie.getBM());
+                                            //results.setEditable(false);
+                                            //results2.setText(kie.getEE());
+                                            //results2.setEditable(false);
                                         } else {
                                             JOptionPane.showMessageDialog(null,
                                                     "Please upload a valid scale factor.",
@@ -550,30 +412,11 @@ public class GUI4 extends JFrame{
                                         "Invalid RSN",
                                         JOptionPane.ERROR_MESSAGE);
                             }
-                        } else {
-                            JOptionPane.showMessageDialog(null,
-                                    "Please upload a valid LTS RSN.",
-                                    "Invalid RSN",
-                                    JOptionPane.ERROR_MESSAGE);
                         }
-                    } else {
-                        JOptionPane.showMessageDialog(null,
-                                "Please upload a valid UTS RSN.",
-                                "Invalid RSN",
-                                JOptionPane.ERROR_MESSAGE);
-                    }
-                    //KIE kie = new KIE(files.get(0), files.get(1), files.get(2), files.get(3));
 
-                    /*uTS.setText("Select Unlabeled TS File");
-                    lTS.setText("Select Labeled TS File");
-                    uR.setText("Select Unlabeled R File");
-                    lR.setText("Select Labeled R File");
-                    files = new ArrayList<>();*/
 
-                }
             }
         });
-
     }
     public boolean isValidRSN(String s){
         s = s.strip();
@@ -613,13 +456,4 @@ public class GUI4 extends JFrame{
         return n;
     }
 
-    protected Component makeTextPanel(String text) {
-        JPanel panel = new JPanel(false);
-        JLabel filler = new JLabel(text);
-        filler.setHorizontalAlignment(JLabel.CENTER);
-        panel.setLayout(new GridLayout(1, 1));
-        panel.add(filler);
-        return panel;
-    }
 }
-

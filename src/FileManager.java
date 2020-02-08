@@ -1,6 +1,17 @@
 import java.io.*;
 import java.util.ArrayList;
 
+/**
+ * FileManager
+ *
+ * Extracts information from log/txt files
+ *
+ *
+ * @author Frances O'Leary
+ * @version 01-07-2020
+ *
+ */
+
 public class FileManager {
 
     public FileManager() {
@@ -294,5 +305,6 @@ public class FileManager {
         }
         return values_3;
     }
+
 
 }
